@@ -65,6 +65,7 @@ public class SquareError {
 //            System.out.print(tmp[i][0]);
 //            System.out.print(", ");
 //            System.out.println(tmp[i][1]);
+
 //        }
     }
 }
