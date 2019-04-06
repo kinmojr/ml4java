@@ -36,9 +36,16 @@ public class SquareError {
         return Math.sqrt(2 * err / dataset.length);
     }
 
-    private double[] resolve(double[][] dataset, int m) {
+    private RealMatrix resolve(double[][] dataset, int m) {
         RealMatrix t = createColumnRealMatrix(dataset, 1);
-        double[] ws = new double[m];
+        RealMatrix phi = MatrixUtils.createRealMatrix(dataset.length, m + 1);
+        for (int i = 0; i < dataset.length; i++) {
+            for (int j = 0; j < m + 1; j++) {
+                phi.setEntry(i, j, Math.pow(dataset[i][0], j));
+            }
+        }
+        RealMatrix tmp = MatrixUtils.inverse(phi.transpose().multiply(phi));
+        RealMatrix ws = tmp.multiply(phi.transpose()).multiply(t);
         return ws;
     }
 
@@ -47,26 +54,31 @@ public class SquareError {
         for (int i = 0; i < dataset.length; i++) {
             vals[i] = dataset[i][index];
         }
-        RealMatrix ret = MatrixUtils.createColumnRealMatrix(vals);
-        return ret;
+        return MatrixUtils.createColumnRealMatrix(vals);
     }
 
     public static void main(String[] args) {
         SquareError se = new SquareError(10, new int[]{0, 1, 3, 9});
+        // 学習用と評価用のデータセットを作成
         double[][] trainSet = se.createDataset(se.N);
         double[][] testSet = se.createDataset(se.N);
 
         for (int m : se.M) {
-
+            RealMatrix ws = se.resolve(trainSet, m);
+            Function f = new Function() {
+                @Override
+                public double predict(double x) {
+                    double ret = 0.0;
+                    for (int i = 0; i < m + 1; i++) {
+                        ret += ws.getEntry(i, 0) * Math.pow(x, i);
+                    }
+                    return ret;
+                }
+            };
+            double trainError = se.rmsError(trainSet, f);
+            double testError = se.rmsError(testSet, f);
+            System.out.println("Train Error: " + trainError + ", Test Error: " + testError);
         }
-//        int num = 100;
-//        double[][] tmp = se.createDataset(num);
-//        for (int i = 0; i < num; i++) {
-//            System.out.print(tmp[i][0]);
-//            System.out.print(", ");
-//            System.out.println(tmp[i][1]);
-
-//        }
     }
 }
 
