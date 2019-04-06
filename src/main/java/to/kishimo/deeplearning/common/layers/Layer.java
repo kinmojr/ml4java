@@ -13,3 +13,4 @@ public interface Layer {
 
     public double[][] b();
 }
+

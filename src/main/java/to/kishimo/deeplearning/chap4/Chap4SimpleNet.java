@@ -32,3 +32,4 @@ public class Chap4SimpleNet {
         return index;
     }
 }
+

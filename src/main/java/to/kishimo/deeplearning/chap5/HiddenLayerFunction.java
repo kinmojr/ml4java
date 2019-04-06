@@ -9,3 +9,4 @@ public interface HiddenLayerFunction {
 
     public double[] getGradBias();
 }
+

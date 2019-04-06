@@ -62,3 +62,4 @@ public class NeuralnetMnist {
         System.out.println("Accuracy:" + (float) accuracyCnt / (float) x.getRowDimension());
     }
 }
+

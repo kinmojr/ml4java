@@ -151,3 +151,4 @@ public class Mnist {
 //        HashMap<String, double[][]> ds = new Mnist().loadMinist(true, true, true);
 //    }
 }
+

@@ -236,3 +236,4 @@ public class Chap4TwoLayerNet {
         }
     }
 }
+

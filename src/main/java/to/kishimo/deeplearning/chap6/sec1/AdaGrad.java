@@ -23,3 +23,4 @@ public class AdaGrad implements Optimizer {
         }
     }
 }
+

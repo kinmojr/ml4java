@@ -5,3 +5,4 @@ public interface LastLayerFunction {
 
     public double[][] backward(double dout[][]);
 }
+

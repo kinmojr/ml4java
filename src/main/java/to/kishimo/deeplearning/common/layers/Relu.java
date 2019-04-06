@@ -57,3 +57,4 @@ public class Relu implements Layer {
         return null;
     }
 }
+

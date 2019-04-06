@@ -15,3 +15,4 @@ public interface Network {
 
     public Map<String, double[][]> params();
 }
+

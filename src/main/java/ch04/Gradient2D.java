@@ -66,3 +66,4 @@ public class Gradient2D {
         public double function(double[] x);
     }
 }
+

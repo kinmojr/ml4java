@@ -67,3 +67,4 @@ public class NeuralnetMnistBatch {
         System.out.println("Accuracy:" + (float) accuracyCnt / (float) x.getRowDimension());
     }
 }
+

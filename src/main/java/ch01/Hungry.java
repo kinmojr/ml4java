@@ -5,3 +5,4 @@ public class Hungry {
         System.out.println("I'm hungry!");
     }
 }
+

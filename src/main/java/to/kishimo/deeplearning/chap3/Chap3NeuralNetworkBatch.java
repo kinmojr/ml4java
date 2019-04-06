@@ -147,3 +147,4 @@ public class Chap3NeuralNetworkBatch {
         return ret;
     }
 }
+

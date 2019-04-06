@@ -326,3 +326,4 @@ public class Chap3MnistDataSet implements Serializable {
         }
     }
 }
+

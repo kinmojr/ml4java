@@ -27,3 +27,4 @@ public class SoftmaxWithLossLayer implements LastLayerFunction {
         return dx;
     }
 }
+

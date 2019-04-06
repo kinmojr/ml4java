@@ -70,3 +70,4 @@ public class GradientSimpleNet {
         public double function();
     }
 }
+

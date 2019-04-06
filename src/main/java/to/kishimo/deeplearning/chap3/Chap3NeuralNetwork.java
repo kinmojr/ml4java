@@ -126,3 +126,4 @@ public class Chap3NeuralNetwork {
         return maxIndex;
     }
 }
+

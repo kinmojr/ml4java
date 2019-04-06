@@ -18,3 +18,4 @@ public class SGD implements Optimizer {
         }
     }
 }
+

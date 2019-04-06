@@ -101,3 +101,4 @@ public class TwoLayerNet {
         public double function();
     }
 }
+

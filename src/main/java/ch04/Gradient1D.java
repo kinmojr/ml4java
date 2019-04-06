@@ -55,3 +55,4 @@ public class Gradient1D {
         public double function(Function1 f1, double x, double t);
     }
 }
+

@@ -34,3 +34,4 @@ public class OptimizerCompareNaive {
         return new double[]{x / 10, 2 * y};
     }
 }
+

@@ -61,3 +61,4 @@ public class AffineLayer implements HiddenLayerFunction {
         return ret;
     }
 }
+

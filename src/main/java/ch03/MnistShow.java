@@ -42,3 +42,4 @@ public class MnistShow {
         return bufImg;
     }
 }
+

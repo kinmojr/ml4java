@@ -48,3 +48,4 @@ public class Sigmoid implements Layer {
         return null;
     }
 }
+

@@ -14,3 +14,4 @@ public class SigmoidLayer {
         return dx;
     }
 }
+

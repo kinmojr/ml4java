@@ -123,3 +123,4 @@ public class MultiLayerNet implements Network {
 
     public Map<String, double[][]> params() {return params;}
 }
+

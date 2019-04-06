@@ -36,3 +36,4 @@ public class GradientMethod {
         System.out.println("x1 = " + x[0] + ", x2 = " + x[1]);
     }
 }
+
