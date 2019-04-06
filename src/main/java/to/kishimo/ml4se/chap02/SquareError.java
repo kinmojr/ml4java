@@ -7,78 +7,70 @@ import java.util.Random;
 
 public class SquareError {
     private static Random rand = new Random();
-    private int N;
-    private int[] M;
 
-    public SquareError(int N, int[] M) {
-        this.N = N;
-        this.M = M;
+    public static void main(String[] args) {
+        int N = 10;
+        int[] M = new int[]{0, 1, 3, 9};
+
+        SquareError se = new SquareError();
+        RealMatrix trainSet = se.createDataset(N);
+        RealMatrix testSet = se.createDataset(N);
+
+        for (int m : M) {
+            RealMatrix ws = se.resolve(trainSet, m);
+            double trainError = se.rmsError(trainSet, m, ws);
+            double testError = se.rmsError(testSet, m, ws);
+            System.out.println("Train Error: " + trainError + ", Test Error: " + testError);
+        }
+        System.out.println();
+
+        for (int m = 0; m < N; m++) {
+            RealMatrix ws = se.resolve(trainSet, m);
+            double trainError = se.rmsError(trainSet, m, ws);
+            double testError = se.rmsError(testSet, m, ws);
+            System.out.println("Train Error: " + trainError + ", Test Error: " + testError);
+        }
     }
 
-    private double[][] createDataset(int num) {
-        double[][] ret = new double[num][2];
-        for (int i = 0; i < num; i++) {
-            double x = (double) i / (double) (num - 1);
+    private RealMatrix createDataset(int rows) {
+        RealMatrix ret = MatrixUtils.createRealMatrix(rows, 2);
+        for (int i = 0; i < rows; i++) {
+            double x = (double) i / (double) (rows - 1);
             double y = Math.sin(2 * Math.PI * x) + rand.nextGaussian() * 0.3;
-            ret[i][0] = x;
-            ret[i][1] = y;
+            ret.setEntry(i, 0, x);
+            ret.setEntry(i, 1, y);
         }
         return ret;
     }
 
-    private double rmsError(double[][] dataset, Function f) {
+    private double rmsError(RealMatrix dataset, int m, RealMatrix ws) {
         double err = 0.0;
-        for (int i = 0; i < dataset.length; i++) {
-            double x = dataset[i][0];
-            double y = dataset[i][1];
-            err += 0.5 * Math.pow((y - f.predict(x)), 2.0);
+        for (int i = 0; i < dataset.getRowDimension(); i++) {
+            double x = dataset.getEntry(i, 0);
+            double y = dataset.getEntry(i, 1);
+            err += 0.5 * Math.pow((y - predict(x, m, ws)), 2.0);
         }
-        return Math.sqrt(2 * err / dataset.length);
+        return Math.sqrt(2 * err / dataset.getRowDimension());
     }
 
-    private RealMatrix resolve(double[][] dataset, int m) {
-        RealMatrix t = createColumnRealMatrix(dataset, 1);
-        RealMatrix phi = MatrixUtils.createRealMatrix(dataset.length, m + 1);
-        for (int i = 0; i < dataset.length; i++) {
+    private double predict(double x, int m, RealMatrix ws) {
+        double ret = 0.0;
+        for (int i = 0; i < m + 1; i++) {
+            double w = ws.getEntry(i, 0);
+            ret += w * Math.pow(x, i);
+        }
+        return ret;
+    }
+
+    private RealMatrix resolve(RealMatrix dataset, int m) {
+        RealMatrix t = dataset.getColumnMatrix(1);
+        RealMatrix phi = MatrixUtils.createRealMatrix(dataset.getRowDimension(), m + 1);
+        for (int i = 0; i < dataset.getRowDimension(); i++) {
             for (int j = 0; j < m + 1; j++) {
-                phi.setEntry(i, j, Math.pow(dataset[i][0], j));
+                phi.setEntry(i, j, Math.pow(dataset.getEntry(i, 0), j));
             }
         }
         RealMatrix tmp = MatrixUtils.inverse(phi.transpose().multiply(phi));
-        RealMatrix ws = tmp.multiply(phi.transpose()).multiply(t);
-        return ws;
-    }
-
-    private RealMatrix createColumnRealMatrix(double[][] dataset, int index) {
-        double[] vals = new double[dataset.length];
-        for (int i = 0; i < dataset.length; i++) {
-            vals[i] = dataset[i][index];
-        }
-        return MatrixUtils.createColumnRealMatrix(vals);
-    }
-
-    public static void main(String[] args) {
-        SquareError se = new SquareError(10, new int[]{0, 1, 3, 9});
-        // 学習用と評価用のデータセットを作成
-        double[][] trainSet = se.createDataset(se.N);
-        double[][] testSet = se.createDataset(se.N);
-
-        for (int m : se.M) {
-            RealMatrix ws = se.resolve(trainSet, m);
-            Function f = new Function() {
-                @Override
-                public double predict(double x) {
-                    double ret = 0.0;
-                    for (int i = 0; i < m + 1; i++) {
-                        ret += ws.getEntry(i, 0) * Math.pow(x, i);
-                    }
-                    return ret;
-                }
-            };
-            double trainError = se.rmsError(trainSet, f);
-            double testError = se.rmsError(testSet, f);
-            System.out.println("Train Error: " + trainError + ", Test Error: " + testError);
-        }
+        return tmp.multiply(phi.transpose()).multiply(t);
     }
 }
-
