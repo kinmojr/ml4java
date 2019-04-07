@@ -18,16 +18,16 @@ public class SquareError {
 
         for (int m : M) {
             RealMatrix ws = se.resolve(trainSet, m);
-            double trainError = se.rmsError(trainSet, m, ws);
-            double testError = se.rmsError(testSet, m, ws);
+            double trainError = se.rmsError(trainSet, ws);
+            double testError = se.rmsError(testSet, ws);
             System.out.println("Train Error: " + trainError + ", Test Error: " + testError);
         }
         System.out.println();
 
         for (int m = 0; m < N; m++) {
             RealMatrix ws = se.resolve(trainSet, m);
-            double trainError = se.rmsError(trainSet, m, ws);
-            double testError = se.rmsError(testSet, m, ws);
+            double trainError = se.rmsError(trainSet, ws);
+            double testError = se.rmsError(testSet, ws);
             System.out.println("Train Error: " + trainError + ", Test Error: " + testError);
         }
     }
@@ -43,19 +43,19 @@ public class SquareError {
         return ret;
     }
 
-    private double rmsError(RealMatrix dataset, int m, RealMatrix ws) {
+    private double rmsError(RealMatrix dataset, RealMatrix ws) {
         double err = 0.0;
         for (int i = 0; i < dataset.getRowDimension(); i++) {
             double x = dataset.getEntry(i, 0);
             double y = dataset.getEntry(i, 1);
-            err += 0.5 * Math.pow((y - predict(x, m, ws)), 2.0);
+            err += 0.5 * Math.pow((y - predict(x, ws)), 2.0);
         }
         return Math.sqrt(2 * err / dataset.getRowDimension());
     }
 
-    private double predict(double x, int m, RealMatrix ws) {
+    private double predict(double x, RealMatrix ws) {
         double ret = 0.0;
-        for (int i = 0; i < m + 1; i++) {
+        for (int i = 0; i < ws.getRowDimension(); i++) {
             double w = ws.getEntry(i, 0);
             ret += w * Math.pow(x, i);
         }
