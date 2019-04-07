@@ -20,7 +20,7 @@ public class SquareError {
             RealMatrix ws = se.resolve(trainSet, m);
             double trainError = se.rmsError(trainSet, ws);
             double testError = se.rmsError(testSet, ws);
-            System.out.println("Train Error: " + trainError + ", Test Error: " + testError);
+            System.out.println("m=" + m + ", Train Error: " + trainError + ", Test Error: " + testError);
         }
         System.out.println();
 
@@ -28,7 +28,7 @@ public class SquareError {
             RealMatrix ws = se.resolve(trainSet, m);
             double trainError = se.rmsError(trainSet, ws);
             double testError = se.rmsError(testSet, ws);
-            System.out.println("Train Error: " + trainError + ", Test Error: " + testError);
+            System.out.println("m=" + m + ", Train Error: " + trainError + ", Test Error: " + testError);
         }
     }
 
