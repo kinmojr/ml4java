@@ -1,34 +1,33 @@
-package to.kishimo.ml4se.chap02;
+package to.kishimo.ml4se.ch03;
 
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import java.util.Random;
 
-public class SquareError {
+public class MaximumLikelihood {
     private static Random rand = new Random();
 
     private static int N = 10;
     private static int[] M = new int[]{0, 1, 3, 9};
 
     public static void main(String[] args) {
-        SquareError se = new SquareError();
-        RealMatrix trainSet = se.createDataset(N);
-        RealMatrix testSet = se.createDataset(N);
+        MaximumLikelihood ml = new MaximumLikelihood();
+        RealMatrix trainSet = ml.createDataset(N);
+        RealMatrix testSet = ml.createDataset(N);
 
         for (int m : M) {
-            RealMatrix ws = se.resolve(trainSet, m);
-            double trainError = se.rmsError(trainSet, ws);
-            double testError = se.rmsError(testSet, ws);
-            System.out.println("m=" + m + ", Train Error: " + trainError + ", Test Error: " + testError);
+            RealMatrix ws = ml.resolve(trainSet, m);
+            double sigma = ml.sigma(trainSet, ws);
+            System.out.println("m=" + m + ", Sigma: " + sigma);
         }
         System.out.println();
 
         for (int m = 0; m < N; m++) {
-            RealMatrix ws = se.resolve(trainSet, m);
-            double trainError = se.rmsError(trainSet, ws);
-            double testError = se.rmsError(testSet, ws);
-            System.out.println("m=" + m + ", Train Error: " + trainError + ", Test Error: " + testError);
+            RealMatrix ws = ml.resolve(trainSet, m);
+            double trainLikelihood = ml.logLikelihood(trainSet, ws);
+            double testLikelihood = ml.logLikelihood(testSet, ws);
+            System.out.println("m=" + m + ", Train Log Likelihood: " + trainLikelihood + ", Test Log Likelihood: " + testLikelihood);
         }
     }
 
@@ -43,23 +42,27 @@ public class SquareError {
         return ret;
     }
 
-    private double rmsError(RealMatrix dataset, RealMatrix ws) {
-        double err = 0.0;
+    private double logLikelihood(RealMatrix dataset, RealMatrix ws) {
+        double dev = 0.0;
+        double n = dataset.getRowDimension();
         for (int i = 0; i < dataset.getRowDimension(); i++) {
             double x = dataset.getEntry(i, 0);
             double y = dataset.getEntry(i, 1);
-            err += 0.5 * Math.pow((y - f(x, ws)), 2.0);
+            dev += Math.pow((y - f(x, ws)), 2.0);
         }
-        return Math.sqrt(2 * err / dataset.getRowDimension());
+        double err = dev * 0.5;
+        double beta = n / dev;
+        double lp = -beta * err + 0.5 * n * Math.log(0.5 * beta / Math.PI);
+        return lp;
     }
 
     private double f(double x, RealMatrix ws) {
-        double ret = 0.0;
+        double y = 0.0;
         for (int i = 0; i < ws.getRowDimension(); i++) {
             double w = ws.getEntry(i, 0);
-            ret += w * Math.pow(x, i);
+            y += w * Math.pow(x, i);
         }
-        return ret;
+        return y;
     }
 
     private RealMatrix resolve(RealMatrix dataset, int m) {
@@ -72,5 +75,16 @@ public class SquareError {
         }
         RealMatrix tmp = MatrixUtils.inverse(phi.transpose().multiply(phi));
         return tmp.multiply(phi.transpose()).multiply(t);
+    }
+
+    private double sigma(RealMatrix dataset, RealMatrix ws) {
+        double sigma2 = 0.0;
+        for (int i = 0; i < dataset.getRowDimension(); i++) {
+            double x = dataset.getEntry(i, 0);
+            double y = dataset.getEntry(i, 1);
+            sigma2 += Math.pow((f(x, ws) - y), 2.0);
+        }
+        sigma2 /= dataset.getRowDimension();
+        return Math.sqrt(sigma2);
     }
 }

@@ -1,4 +1,4 @@
-package to.kishimo.ml4se.chap04;
+package to.kishimo.ml4se.ch04;
 
 public class Data {
     public double x;

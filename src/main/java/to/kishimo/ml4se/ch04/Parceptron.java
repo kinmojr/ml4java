@@ -1,6 +1,4 @@
-package to.kishimo.ml4se.chap04;
-
-import org.apache.commons.math3.linear.RealMatrix;
+package to.kishimo.ml4se.ch04;
 
 import java.util.ArrayList;
 import java.util.Collections;
