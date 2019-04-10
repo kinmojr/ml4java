@@ -8,10 +8,10 @@ import java.util.Random;
 public class SquareError {
     private static Random rand = new Random();
 
-    public static void main(String[] args) {
-        int N = 10;
-        int[] M = new int[]{0, 1, 3, 9};
+    private static int N = 10;
+    private static int[] M = new int[]{0, 1, 3, 9};
 
+    public static void main(String[] args) {
         SquareError se = new SquareError();
         RealMatrix trainSet = se.createDataset(N);
         RealMatrix testSet = se.createDataset(N);
