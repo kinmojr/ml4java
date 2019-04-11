@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class Parceptron {
+public class Perceptron {
     private int n1 = 20;
     private double[] mu1 = {15.0, 10.0};
 
@@ -16,7 +16,7 @@ public class Parceptron {
 
     public static void main(String[] args) {
         for (double variance : variances) {
-            Parceptron p = new Parceptron();
+            Perceptron p = new Perceptron();
             p.runSimulation(variance);
         }
     }
