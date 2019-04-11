@@ -21,27 +21,60 @@ public class Parceptron {
     }
 
     private void runSimulation(double variance) {
-        List<Data> trainSet = prepareDataset(variance);
+        List<Point> trainSet = prepareDataset(variance);
+        double w0 = 0.0;
+        double w1 = 0.0;
+        double w2 = 0.0;
+        double bias = 0.0;
+        for (Point p : trainSet) {
+            bias += (Math.abs(p.x) + Math.abs(p.y)) / 2.0;
+        }
+        bias /= trainSet.size();
 
+        double[][] paramhist = new double[30][3];
+        for (int i = 0; i < 30; i++) {
+            for (int j = 0; j < trainSet.size(); j++) {
+                Point p = trainSet.get(j);
+                if (p.type * (w0 * bias + w1 * p.x + w2 * p.y) <= 0) {
+                    w0 += p.type * bias;
+                    w1 += p.type * p.x;
+                    w2 += p.type * p.y;
+                }
+            }
+            paramhist[i][0] = w0;
+            paramhist[i][1] = w1;
+            paramhist[i][2] = w2;
+        }
+
+        double err = 0.0;
+        for (Point p : trainSet) {
+            if (p.type * (w0 * bias + w1 * p.x + w2 * p.y) <= 0) {
+                err += 1.0;
+            }
+        }
+        double errRate = err * 100 / trainSet.size();
+        System.out.println("Error Rate: " + errRate + "%");
+        for (int i = 0; i < paramhist.length; i++) {
+            System.out.println(i + 1 + " w0: " + paramhist[i][0] + ", w1: " + paramhist[i][1] + ", w2: " + paramhist[i][2]);
+        }
+        System.out.println();
     }
 
-    private List<Data> prepareDataset(double variance) {
-        double[][] cov1 = new double[][]{{variance, 0}, {0, variance}};
-        double[][] cov2 = new double[][]{{0, variance}, {variance, 0}};
-        List<Data> df1 = multivariateNormal(mu1, cov1, 1, n1);
-        List<Data> df2 = multivariateNormal(mu2, cov2, -1, n2);
-        List<Data> df = new ArrayList<>();
+    private List<Point> prepareDataset(double var) {
+        List<Point> df1 = variateNormal(mu1, var, 1, n1);
+        List<Point> df2 = variateNormal(mu2, var, -1, n2);
+        List<Point> df = new ArrayList<>();
         df.addAll(df1);
         df.addAll(df2);
         Collections.shuffle(df);
         return df;
     }
 
-    private List<Data> multivariateNormal(double[] mu, double[][] cov, int type, int num) {
-        List<Data> dataset = new ArrayList<Data>();
+    private List<Point> variateNormal(double[] mu, double var, int type, int num) {
+        List<Point> dataset = new ArrayList<Point>();
         for (int i = 0; i < num; i++) {
-            Data data = new Data(mu, cov, type);
-            dataset.add(data);
+            Point p = new Point(mu, var, type);
+            dataset.add(p);
         }
         return dataset;
     }
