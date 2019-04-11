@@ -3,6 +3,7 @@ package to.kishimo.ml4se.ch04;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class Parceptron {
     private int n1 = 20;
@@ -71,11 +72,25 @@ public class Parceptron {
     }
 
     private List<Point> variateNormal(double[] mu, double var, int type, int num) {
-        List<Point> dataset = new ArrayList<Point>();
+        List<Point> dataset = new ArrayList<>();
         for (int i = 0; i < num; i++) {
             Point p = new Point(mu, var, type);
             dataset.add(p);
         }
         return dataset;
+    }
+
+    private static class Point {
+        private static Random rand = new Random();
+
+        private double x;
+        private double y;
+        private int type;
+
+        private Point(double[] mu, double var, int type) {
+            this.type = type;
+            x = mu[0] + rand.nextGaussian() * Math.sqrt(var);
+            y = mu[1] + rand.nextGaussian() * Math.sqrt(var);
+        }
     }
 }

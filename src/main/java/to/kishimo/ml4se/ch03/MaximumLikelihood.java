@@ -52,8 +52,7 @@ public class MaximumLikelihood {
         }
         double err = dev * 0.5;
         double beta = n / dev;
-        double lp = -beta * err + 0.5 * n * Math.log(0.5 * beta / Math.PI);
-        return lp;
+        return -beta * err + 0.5 * n * Math.log(0.5 * beta / Math.PI);
     }
 
     private double f(double x, RealMatrix ws) {
