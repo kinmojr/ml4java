@@ -3,34 +3,27 @@ package to.kishimo.ml4se.ch05;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-public class LogisticVsPerceptron {
-    private static double[] variances = {5.0, 10.0, 15.0, 30.0};
+public class RocCurve {
+    private static double[] variances = {50.0, 150.0};
 
     public static void main(String[] args) {
         for (double variance : variances) {
-            LogisticVsPerceptron lp = new LogisticVsPerceptron();
-            lp.runSimulation(variance);
+            System.out.println("Variance: " + variance);
+            RocCurve rc = new RocCurve();
+            List<Point> result = rc.runSimulation(variance);
+            rc.calcRocAuc(result);
+            System.out.println();
         }
     }
 
-    private void runSimulation(double variance) {
-        System.out.println("Variance: " + variance);
+    private List<Point> runSimulation(double variance) {
         List<Point> trainSet = prepareDataset(variance);
-        runLogistic(trainSet);
-        runPerceptron(trainSet);
-        System.out.println();
-    }
-
-    private void runLogistic(List<Point> trainSet) {
         RealMatrix w = MatrixUtils.createRealMatrix(new double[][]{{0.0}, {0.1}, {0.1}});
         RealMatrix phi = createPhi(trainSet);
         RealMatrix t = createT(trainSet);
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 100; i++) {
             RealMatrix y = MatrixUtils.createRealMatrix(1, phi.getRowDimension());
             for (int j = 0; j < phi.getRowDimension(); j++) {
                 RealMatrix line = phi.getRowMatrix(j);
@@ -50,47 +43,68 @@ public class LogisticVsPerceptron {
         }
         // 不正解率を計算する
         double err = 0.0;
-        for (Point p : trainSet) {
-            int type = p.type * 2 - 1;
-            if (type * (w.getEntry(0, 0) + w.getEntry(1, 0) * p.x + w.getEntry(2, 0) * p.y) < 0) {
+        for (Point line : trainSet) {
+            double a = w.getEntry(0, 0) + w.getEntry(1, 0) * line.x + w.getEntry(2, 0) * line.y;
+            double p = 1.0 / (1.0 + Math.exp(-a));
+            line.prob = p;
+            if ((p - 0.5) * (line.type * 2 - 1) < 0) {
                 err += 1.0;
             }
         }
         double errRate = err * 100 / trainSet.size();
-        System.out.println("LogisticRegression Error Rate: " + errRate + "%");
+        System.out.println("Error Rate: " + errRate + "%");
+        return trainSet;
     }
 
-    private void runPerceptron(List<Point> trainSet) {
-        double w0 = 0.0;
-        double w1 = 0.0;
-        double w2 = 0.0;
-        double bias = 0.0;
-        for (Point p : trainSet) {
-            bias += (Math.abs(p.x) + Math.abs(p.y)) / 2.0;
+    private void calcRocAuc(List<Point> result) {
+        // 確率値が高い順にソートする
+        result.sort(
+                new Comparator<Point>() {
+                    @Override
+                    public int compare(Point obj1, Point obj2) {
+                        if (obj2.prob - obj1.prob > 0.0) {
+                            return 1;
+                        } else if (obj2.prob - obj1.prob == 0.0) {
+                            return 0;
+                        } else {
+                            return -1;
+                        }
+                    }
+                }
+        );
+        // 陽性数と陰性数をカウントする
+        int positives = 0;
+        int negatives = 0;
+        for (int i = 0; i < result.size(); i++) {
+            Point line = result.get(i);
+            if (line.type == 1) positives++;
+            else negatives++;
         }
-        bias /= trainSet.size();
-
-        for (int i = 0; i < 30; i++) {
-            for (int j = 0; j < trainSet.size(); j++) {
-                Point p = trainSet.get(j);
-                int type = p.type * 2 - 1;
-                if (type * (w0 * bias + w1 * p.x + w2 * p.y) <= 0) {
-                    w0 += type * bias;
-                    w1 += type * p.x;
-                    w2 += type * p.y;
+        // 真陽性率と偽陽性率を計算する
+        double[] tprs = new double[result.size()];
+        double[] fprs = new double[result.size()];
+        for (int i = 0; i < result.size(); i++) {
+            Point line = result.get(i);
+            for (int j = 0; j < result.size(); j++) {
+                if (i < j) {
+                    if (line.type == 1) {
+                        tprs[j] += 1.0 / positives;
+                    } else {
+                        fprs[j] += 1.0 / negatives;
+                    }
                 }
             }
         }
-        // 不正解率を計算する
-        double err = 0.0;
-        for (Point p : trainSet) {
-            int type = p.type * 2 - 1;
-            if (type * (w0 * bias + w1 * p.x + w2 * p.y) <= 0) {
-                err += 1.0;
+        // ROC AUCを計算する
+        double rocAuc = 0.0;
+        double lastFpr = 0.0;
+        for (int i = 0; i < tprs.length; i++) {
+            if (fprs[i] > lastFpr || i == (tprs.length - 1)) {
+                rocAuc += tprs[i] * (fprs[i] - lastFpr);
+                lastFpr = fprs[i];
             }
         }
-        double errRate = err * 100 / trainSet.size();
-        System.out.println("Perceptron Error Rate: " + errRate + "%");
+        System.out.println("ROC AUC: " + rocAuc);
     }
 
     /**
@@ -99,9 +113,9 @@ public class LogisticVsPerceptron {
      * @return データのリスト
      */
     private List<Point> prepareDataset(double var) {
-        int n1 = 10;
-        int n2 = 10;
-        double[] mu1 = {7.0, 7.0};
+        int n1 = 80;
+        int n2 = 200;
+        double[] mu1 = {9.0, 9.0};
         double[] mu2 = {-3.0, -3.0};
         List<Point> df1 = variateNormal(mu1, var, 1, n1);
         List<Point> df2 = variateNormal(mu2, var, 0, n2);
@@ -164,11 +178,13 @@ public class LogisticVsPerceptron {
         private double x;
         private double y;
         private int type;
+        private double prob;
 
         private Point(double[] mu, double var, int type) {
             this.type = type;
             x = mu[0] + rand.nextGaussian() * Math.sqrt(var);
             y = mu[1] + rand.nextGaussian() * Math.sqrt(var);
+            prob = 0.0;
         }
     }
 }
